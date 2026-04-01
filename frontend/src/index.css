@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --primary: 356 96% 47%; /* Netflix Red */
+  }
+}
+
+body {
+  @apply bg-black text-white font-sans antialiased;
+}
+
+/* Glassmorphism helpers */
+.glass {
+  @apply bg-white/5 backdrop-blur-md border border-white/10;
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #141414, #2b0305, #141414, #000000);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E50914;
+}

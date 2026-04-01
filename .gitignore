@@ -1,0 +1,15 @@
+# Virtual Environment
+.venv/
+node_modules/
+
+# Environment Variables
+.env
+
+# Database
+*.db
+*.sqlite3
+database.db
+
+# Python
+__pycache__/
+*.pyc
