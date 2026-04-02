@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Hero from './components/Hero';
 import MovieGrid from './components/MovieGrid';
 import Chatbot from './components/Chatbot';
@@ -25,14 +25,11 @@ export default function App() {
   // Modals
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeMovieId, setActiveMovieId] = useState<number | null>(null);
+  const fetchRequestId = useRef(0);
 
   const BASE_URL = '/api/tmdb';
 
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(`myList_${user}`, JSON.stringify(myList));
-    }
-  }, [myList, user]);
+
 
   useEffect(() => {
     if (user) {
@@ -47,6 +44,10 @@ export default function App() {
   }, [user]);
 
   useEffect(() => {
+    if (activeTab === 'mylist') setMovies(myList);
+  }, [myList]);
+
+  useEffect(() => {
     if (activeTab === 'home') {
       if (activeGenre) fetchByGenre(activeGenre);
       else fetchTrending();
@@ -59,31 +60,49 @@ export default function App() {
       setSearchTitle('My Reviews');
       setLoading(false);
     }
-  }, [activeTab, myList, activeGenre]);
+  }, [activeTab, activeGenre]);
 
   const fetchTrending = async () => {
+    const reqId = ++fetchRequestId.current;
     setLoading(true);
     setSearchTitle('Trending Masterpieces');
     try {
       const res = await fetch(`${BASE_URL}/trending/movie/week`);
       const data = await res.json();
-      setMovies(data.results.filter((m: any) => m.poster_path).slice(0, 15));
+      if (reqId === fetchRequestId.current) {
+        setMovies(data.results.filter((m: any) => m.poster_path).slice(0, 15));
+      }
     } catch (e) {
       console.error(e);
     }
-    setLoading(false);
+    if (reqId === fetchRequestId.current) setLoading(false);
   };
 
   const fetchByGenre = async (genreId: number) => {
+    const reqId = ++fetchRequestId.current;
     setLoading(true);
     setActiveTab('home');
     setSearchTitle('Genre Highlights');
     try {
-      const res = await fetch(`${BASE_URL}/discover/movie?with_genres=${genreId}&sort_by=popularity.desc`);
+      // Adding cache-buster to completely guarantee fresh data and preventing proxy/browser caching issues
+      const res = await fetch(`${BASE_URL}/discover/movie?with_genres=${genreId}&sort_by=popularity.desc&page=1&_t=${Date.now()}`);
       const data = await res.json();
-      setMovies(data.results.filter((m: any) => m.poster_path).slice(0, 15));
-    } catch(e) {}
-    setLoading(false);
+      
+      if (reqId === fetchRequestId.current) {
+        if (data.results && Array.isArray(data.results)) {
+          const validMovies = data.results.filter((m: any) => m.poster_path);
+          const shuffledMovies = validMovies.sort(() => 0.5 - Math.random());
+          setMovies(shuffledMovies.slice(0, 15));
+        } else {
+          setMovies([]); // Show empty if TMDB returns a strange error payload without results
+        }
+      }
+    } catch(e) {
+      if (reqId === fetchRequestId.current) {
+         setMovies([]); // Clear screen on fatal crash instead of silently locking UI
+      }
+    }
+    if (reqId === fetchRequestId.current) setLoading(false);
   };
 
   const handleSearch = async (query: string) => {
@@ -103,11 +122,14 @@ export default function App() {
 
   const toggleMyList = (movie: any) => {
     if (!user) return alert("Please sign in to save movies to your list!");
+    let newList;
     if (myList.find(m => m.id === movie.id)) {
-      setMyList(myList.filter(m => m.id !== movie.id));
+      newList = myList.filter(m => m.id !== movie.id);
     } else {
-      setMyList([...myList, movie]);
+      newList = [...myList, movie];
     }
+    setMyList(newList);
+    localStorage.setItem(`myList_${user}`, JSON.stringify(newList));
   };
 
   return (
