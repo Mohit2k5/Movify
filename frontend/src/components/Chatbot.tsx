@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot } from 'lucide-react';
 
-export default function Chatbot({ API_KEY, BASE_URL }: { API_KEY: string, BASE_URL: string }) {
+export default function Chatbot({ BASE_URL }: { BASE_URL: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<any[]>([{ text: "Hi! I'm your Movify Assistant. Tell me what you're in the mood for!", sender: 'bot' }]);
   const [input, setInput] = useState('');
@@ -33,8 +33,8 @@ export default function Chatbot({ API_KEY, BASE_URL }: { API_KEY: string, BASE_U
       
       if (data.target_genre || data.search_query) {
         const url = data.target_genre 
-            ? `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${data.target_genre}&sort_by=popularity.desc`
-            : `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(data.search_query)}`;
+            ? `${BASE_URL}/discover/movie?with_genres=${data.target_genre}&sort_by=popularity.desc`
+            : `${BASE_URL}/search/movie?query=${encodeURIComponent(data.search_query)}`;
             
         const tmdbRes = await fetch(url);
         const tmdbData = await tmdbRes.json();

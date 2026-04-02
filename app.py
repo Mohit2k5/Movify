@@ -2,6 +2,7 @@ import os
 import sqlite3
 from flask import Flask, request, jsonify, send_from_directory
 import json
+import requests
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -103,6 +104,19 @@ def delete_review(review_id):
     conn.commit()
     conn.close()
     return jsonify({'success': True})
+
+# TMDB Proxy Route
+@app.route('/api/tmdb/<path:subpath>', methods=['GET'])
+def tmdb_proxy(subpath):
+    tmdb_url = f"https://api.themoviedb.org/3/{subpath}"
+    target_params = request.args.to_dict()
+    target_params['api_key'] = os.environ.get("TMDB_API_KEY")
+    
+    try:
+        resp = requests.get(tmdb_url, params=target_params)
+        return jsonify(resp.json()), resp.status_code
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Powerful Chatbot Backend Logic mapping pure language to TMDB APIs dynamically
 @app.route('/api/chat', methods=['POST'])

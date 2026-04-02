@@ -8,8 +8,6 @@ export default function MovieDetailsModal({ movieId, onClose, user }: { movieId:
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
 
-  const API_KEY = 'befbc863acfa2253c9db30792dfc57f7';
-
   useEffect(() => {
     fetchMovieData();
     fetchReviews();
@@ -17,9 +15,9 @@ export default function MovieDetailsModal({ movieId, onClose, user }: { movieId:
 
   const fetchMovieData = async () => {
     try {
-      const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
+      const res = await fetch(`/api/tmdb/movie/${movieId}`);
       setMovie(await res.json());
-      const castRes = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${API_KEY}`);
+      const castRes = await fetch(`/api/tmdb/movie/${movieId}/credits`);
       const castData = await castRes.json();
       setCast(castData.cast.slice(0, 10));
     } catch (e) {}

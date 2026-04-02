@@ -26,8 +26,7 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeMovieId, setActiveMovieId] = useState<number | null>(null);
 
-  const API_KEY = 'befbc863acfa2253c9db30792dfc57f7';
-  const BASE_URL = 'https://api.themoviedb.org/3';
+  const BASE_URL = '/api/tmdb';
 
   useEffect(() => {
     if (user) {
@@ -66,7 +65,7 @@ export default function App() {
     setLoading(true);
     setSearchTitle('Trending Masterpieces');
     try {
-      const res = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
+      const res = await fetch(`${BASE_URL}/trending/movie/week`);
       const data = await res.json();
       setMovies(data.results.filter((m: any) => m.poster_path).slice(0, 15));
     } catch (e) {
@@ -80,7 +79,7 @@ export default function App() {
     setActiveTab('home');
     setSearchTitle('Genre Highlights');
     try {
-      const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc`);
+      const res = await fetch(`${BASE_URL}/discover/movie?with_genres=${genreId}&sort_by=popularity.desc`);
       const data = await res.json();
       setMovies(data.results.filter((m: any) => m.poster_path).slice(0, 15));
     } catch(e) {}
@@ -93,7 +92,7 @@ export default function App() {
     setLoading(true);
     setSearchTitle(`Search Results: ${query}`);
     try {
-      const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+      const res = await fetch(`${BASE_URL}/search/movie?query=${encodeURIComponent(query)}`);
       const data = await res.json();
       setMovies(data.results.filter((m: any) => m.poster_path));
     } catch (e) {
@@ -163,7 +162,7 @@ export default function App() {
         )}
       </main>
 
-      <Chatbot API_KEY={API_KEY} BASE_URL={BASE_URL} />
+      <Chatbot BASE_URL={BASE_URL} />
 
       {/* Modals */}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onLogin={(u) => setUser(u)} />}

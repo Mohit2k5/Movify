@@ -2,8 +2,8 @@
  * Movify - Premium Movie Discovery
  */
 
-const API_KEY = 'befbc863acfa2253c9db30792dfc57f7';
-const BASE_URL = 'https://api.themoviedb.org/3';
+
+const BASE_URL = '/api/tmdb';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 // Global State
@@ -379,7 +379,7 @@ window.openMovieDetails = async function(movieId) {
     if(!movie) return;
     
     try {
-        const res = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
+        const res = await fetch(`${BASE_URL}/movie/${movieId}`);
         if(res.ok) {
             movie = await res.json();
             state.movieCache[movieId] = movie;
@@ -639,8 +639,8 @@ async function handleUserChatMessage(e) {
         
         if (aiData.target_genre || aiData.search_query) {
             const url = aiData.target_genre 
-                ? `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${aiData.target_genre}&sort_by=popularity.desc`
-                : `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(aiData.search_query)}`;
+                ? `${BASE_URL}/discover/movie?with_genres=${aiData.target_genre}&sort_by=popularity.desc`
+                : `${BASE_URL}/search/movie?query=${encodeURIComponent(aiData.search_query)}`;
                 
             const res = await fetch(url);
             const data = await res.json();
@@ -666,7 +666,7 @@ async function handleUserChatMessage(e) {
         else if(lowered.match(/\b(action|fight)\b/)){ targetGenreId=28; responsePhrase="Check out this action movie:"; }
         else { targetGenreId=35; responsePhrase="Let's try a comedy!"; }
         
-        const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${targetGenreId}`);
+        const res = await fetch(`${BASE_URL}/discover/movie?with_genres=${targetGenreId}`);
         const data = await res.json();
         addChatMessage(responsePhrase, 'bot');
         addMovieMessageOptions(data.results[0]);
@@ -730,7 +730,7 @@ async function fetchTrendingMovies() {
     elements.grid.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 w-full min-h-[400px]"; // Restore normal grid
     await withLoading(async () => {
         try {
-            const res = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
+            const res = await fetch(`${BASE_URL}/trending/movie/week`);
             const data = await res.json();
             renderMovies(data.results);
         } catch (error) { showNoResults(); }
@@ -751,7 +751,7 @@ async function fetchSearchMovies(query) {
     elements.grid.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 w-full min-h-[400px]";
     await withLoading(async () => {
         try {
-            const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+            const res = await fetch(`${BASE_URL}/search/movie?query=${encodeURIComponent(query)}`);
             const data = await res.json();
             elements.sectionTitle.textContent = `Search Results for "${query}"`;
             elements.heroSection.classList.add('hidden');
@@ -764,7 +764,7 @@ async function fetchMoviesByGenre(genreId, genreName) {
     elements.grid.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 w-full min-h-[400px]";
     await withLoading(async () => {
         try {
-            const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`);
+            const res = await fetch(`${BASE_URL}/discover/movie?with_genres=${genreId}`);
             const data = await res.json();
             elements.sectionTitle.textContent = `${genreName} Movies`;
             renderMovies(data.results);
